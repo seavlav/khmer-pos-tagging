@@ -1,0 +1,8 @@
+numpy
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+pydantic
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
