@@ -7,6 +7,7 @@ Part-of-Speech (POS) tagging—assigning grammatical labels like noun, verb, or 
 
 ## 2. problem Statement:
 **1.Word Segmentation Challenge:** Khmer text is written continuously without spaces between words. A naive whitespace-based tokenization fails.
+
 **2.POS Tagging Challenge:** POS tagging in Khmer is challenging due to morphological complexity and limited annotated corpora.
 
 ### **The goal of this project:** 
@@ -96,6 +97,7 @@ Code:
 
 Sample of our interface and Prediction after connect to docker
 <img width="1157" height="898" alt="image" src="https://github.com/user-attachments/assets/c82c10b3-50cc-4460-98a3-bfa94b0cbeda" />
+
 
 
 
