@@ -91,8 +91,8 @@
 <main>
   <section>
     <h2>Input Khmer Text</h2>
-    <textarea placeholder="Enter Khmer text here..."></textarea>
-    <button>Analyze Text</button>
+    <textarea id="inputText" placeholder="Enter Khmer text here..."></textarea>
+    <button id="analyzeBtn">Analyze Text</button> 
     <p class="note">The system will segment words and assign POS tags using a BiLSTM model.</p>
   </section>
 
@@ -107,24 +107,9 @@
           <th>Description</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="resultBody">
         <tr>
-          <td>1</td>
-          <td>សិស្ស</td>
-          <td>NOUN</td>
-          <td>Noun</td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>រៀន</td>
-          <td>VERB</td>
-          <td>Verb</td>
-        </tr>
-        <tr>
-          <td>3</td>
-          <td>ភាសាខ្មែរ</td>
-          <td>NOUN</td>
-          <td>Noun</td>
+          <td colspan="4">Enter text and click analyze to see results.</td>
         </tr>
       </tbody>
     </table>
@@ -134,6 +119,74 @@
 <footer>
   © 2026 Advanced Programming for Data Science | Khmer POS Tagging Project
 </footer>
+
+<script>
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const inputText = document.getElementById('inputText');
+  const resultBody = document.getElementById('resultBody');
+  const tagMap = {
+      "AUX": "Auxiliary Verb",
+      "CC": "Conjunction",
+      "CD": "Cardinal Number",
+      "DT": "Determiner Pronoun",
+      "IN": "Preposition",
+      "JJ": "Adjective",
+      "NN": "Noun",
+      "PA": "Particle",
+      "PN": "Proper Noun",
+      "PRO": "Pronoun",
+      "RB": "Adverb",
+      "SYM": "Symbol",
+      "VB": "Verb"
+  };
+
+  analyzeBtn.addEventListener('click', async () => {
+    const text = inputText.value.trim();
+    if (!text) return alert("Please enter text");
+
+    analyzeBtn.innerText = "Analyzing...";
+    analyzeBtn.disabled = true;
+
+    try {
+      // Ensure this URL matches your FastAPI server port
+      const response = await fetch('http://127.0.0.1:8000/api/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text })
+      });
+
+      const data = await response.json();
+      
+      // Clear and populate table
+      resultBody.innerHTML = '';
+      data.tokens.forEach((item, index) => {
+          // Get the tag from the backend (e.g., "NN")
+          const shortTag = item.tag.toUpperCase(); 
+          
+          // Look up the full name (e.g., "Noun"). 
+          // If not found, just show the short tag.
+          const fullName = tagMap[shortTag] || shortTag;
+
+          const row = `
+              <tr>
+                  <td>${index + 1}</td>
+                  <td class="khmer-text">${item.word}</td>
+                  <td><b style="color: #1f3c88;">${shortTag}</b></td>
+                  <td>${fullName}</td>
+              </tr>
+          `;
+          resultBody.innerHTML += row;
+      });
+
+    } catch (error) {
+      console.error(error);
+      alert("Could not connect to the backend. Is FastAPI running?");
+    } finally {
+      analyzeBtn.innerText = "Analyze Text";
+      analyzeBtn.disabled = false;
+    }
+  });
+</script>
 
 </body>
 </html>
