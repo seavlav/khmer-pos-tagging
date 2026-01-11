@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 
 class BiLSTM_POS(nn.Module):
-    def init(self):
-        super().init()
+    def __init__(self):
+        super().__init__()
         self.embedding = nn.Embedding(91, 128, padding_idx=0)
         self.lstm = nn.LSTM(128, 256, batch_first=True, bidirectional=True)
         self.seg_fc = nn.Linear(512, 2)
