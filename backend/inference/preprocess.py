@@ -3,7 +3,7 @@ import json
 import os
 
 class TextPreprocessor:
-    def init(self, char2idx_path):
+    def __init__(self, char2idx_path):
         # Load the character mapping
         if not os.path.exists(char2idx_path):
             raise FileNotFoundError(f"Mapping file not found at {char2idx_path}")

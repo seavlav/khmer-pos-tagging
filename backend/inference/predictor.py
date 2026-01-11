@@ -5,7 +5,7 @@ from model.bilstm_model import BiLSTM_POS
 from inference.preprocess import TextPreprocessor
 
 class POSPredictor:
-    def init(self, model_path, char_map, pos_map):
+    def __init__(self, model_path, char_map, pos_map):
         # Set device (Detect GPU, otherwise CPU)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
