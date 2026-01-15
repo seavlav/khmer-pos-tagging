@@ -64,6 +64,14 @@ The frontend provides a user-friendly interface for text input and output visual
 
 **Output Visualization**: Displays segmented words and POS tags in a clear, readable format.
 
+**Interface	URL**
+
+Web UI	http://localhost
+
+API Documentation	http://localhost:8000/docs
+
+Direct API	http://localhost:8000
+
 ### **2. Backend**
 
 The backend serves as the bridge between the frontend and the inference engine. 
@@ -97,6 +105,7 @@ Code:
 
 Sample of our interface and Prediction after connect to docker
 <img width="1157" height="898" alt="image" src="https://github.com/user-attachments/assets/c82c10b3-50cc-4460-98a3-bfa94b0cbeda" />
+
 
 
 
