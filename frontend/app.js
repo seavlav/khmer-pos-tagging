@@ -1,48 +1,101 @@
-document.getElementById('analyzeBtn').addEventListener('click', async () => {
-    const text = document.getElementById('inputText').value;
-    const resultBody = document.getElementById('resultBody');
-    const btn = document.getElementById('analyzeBtn');
+const analyzeBtn = document.getElementById('analyzeBtn');
+const inputText = document.getElementById('inputText');
+const resultBody = document.getElementById('resultBody');
+const errorMsg = document.getElementById('errorMsg');
 
-    if (!text.trim()) {
-        alert("Please enter some text.");
-        return;
+// POS tag descriptions
+const tagMap = {
+  AUX: "Auxiliary Verb",
+  CC: "Conjunction",
+  CD: "Cardinal Number",
+  DT: "Determiner",
+  IN: "Preposition",
+  JJ: "Adjective",
+  NN: "Noun",
+  PA: "Particle",
+  PN: "Proper Noun",
+  PRO: "Pronoun",
+  RB: "Adverb",
+  SYM: "Symbol",
+  VB: "Verb",
+  O: "None"
+};
+
+function getPosDescription(tag) {
+  return tagMap[tag.toUpperCase()] || "Unknown";
+}
+
+function showError(message) {
+  errorMsg.innerText = message;
+  errorMsg.style.display = 'block';
+  inputText.style.border = '1px solid #c62828';
+}
+
+function clearError() {
+  errorMsg.style.display = 'none';
+  inputText.style.border = '1px solid #ccc';
+}
+
+analyzeBtn.addEventListener('click', async () => {
+  const text = inputText.value.trim();
+
+  // Validation
+  if (!text) {
+    showError("Please enter some Khmer text before analyzing.");
+    inputText.focus();
+    return;
+  }
+
+  clearError();
+
+  // Loading UI
+  analyzeBtn.disabled = true;
+  analyzeBtn.innerText = "Analyzing...";
+  resultBody.innerHTML =
+    '<tr><td colspan="4">Processing...</td></tr>';
+
+  try {
+    const response = await fetch('http://127.0.0.1:8000/api/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+
+    if (!response.ok) {
+      throw new Error("Server error");
     }
 
-    // Update UI to show loading state
-    btn.disabled = true;
-    btn.innerText = "Analyzing...";
-    resultBody.innerHTML = '<tr><td colspan="4">Processing...</td></tr>';
+    const data = await response.json();
+    resultBody.innerHTML = '';
 
-    try {
-        const response = await fetch('http://127.0.0.1:8000/api/predict', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: text })
-        });
-
-        if (!response.ok) throw new Error('Backend server error');
-
-        const data = await response.json();
-        
-        // Clear table and inject new rows
-        resultBody.innerHTML = "";
-        data.tokens.forEach((item, index) => {
-            const row = `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td style="font-family: 'Kantumruy Pro', sans-serif;">${item.word}</td>
-                    <td><b style="color: #1f3c88;">${item.tag}</b></td>
-                    <td>${getPosDescription(item.tag)}</td>
-                </tr>
-            `;
-            resultBody.innerHTML += row;
-        });
-
-    } catch (error) {
-        console.error("Error:", error);
-        resultBody.innerHTML = '<tr><td colspan="4" style="color:red;">Error connecting to backend. Ensure FastAPI is running.</td></tr>';
-    } finally {
-        btn.disabled = false;
-        btn.innerText = "Analyze Text";
+    if (!data.tokens || data.tokens.length === 0) {
+      resultBody.innerHTML =
+        '<tr><td colspan="4">No tokens returned.</td></tr>';
+      return;
     }
+
+    data.tokens.forEach((item, index) => {
+      resultBody.innerHTML += `
+        <tr>
+          <td>${index + 1}</td>
+          <td class="khmer-text">${item.word}</td>
+          <td><b style="color:#1f3c88;">${item.tag}</b></td>
+          <td>${getPosDescription(item.tag)}</td>
+        </tr>
+      `;
+    });
+
+  } catch (error) {
+    console.error(error);
+    resultBody.innerHTML =
+      `<tr>
+        <td colspan="4" style="color:#c62828;">
+          ❌ Cannot connect to backend.  
+          Please make sure FastAPI is running.
+        </td>
+      </tr>`;
+  } finally {
+    analyzeBtn.disabled = false;
+    analyzeBtn.innerText = "Analyze Text";
+  }
 });

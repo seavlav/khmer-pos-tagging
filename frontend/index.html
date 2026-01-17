@@ -30,14 +30,12 @@
     }
 
     h2 {
-      margin-top: 0;
       color: #1f3c88;
     }
 
-    /* === INPUT TEXTAREA (MATCH RESULT HEIGHT) === */
     textarea {
       width: 100%;
-      min-height: 260px;        /* MATCHES RESULT BOX */
+      min-height: 200px;        /* MATCHES RESULT BOX */
       padding: 12px;
       font-size: 16px;
       border-radius: 6px;
@@ -57,27 +55,26 @@
       cursor: pointer;
     }
 
-    button:hover {
-      background-color: #162d66;
+    button:disabled {
+      background-color: #9aa7c7;
+      cursor: not-allowed;
     }
 
-    .note {
-      margin-top: 10px;
+    .error-message {
+      color: #c62828;
       font-size: 14px;
-      color: #555;
+      margin-top: 6px;
+      display: none;
     }
 
-    /* === RESULT SECTION === */
     .result-section {
       margin-top: 35px;
-      min-height: 260px;       /* SAME AS TEXTAREA */
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 15px;
-      min-height: 200px;       /* PREVENTS SMALL TABLE LOOK */
     }
 
     table th,
@@ -102,14 +99,6 @@
       color: #777;
       font-size: 14px;
     }
-
-    /* === MOBILE OPTIMIZATION === */
-    @media (max-width: 600px) {
-      textarea,
-      .result-section {
-        min-height: 220px;
-      }
-    }
   </style>
 </head>
 
@@ -122,17 +111,13 @@
 
 <main>
 
-  <!-- INPUT SECTION -->
   <section>
     <h2>Input Khmer Text</h2>
     <textarea id="inputText" placeholder="Enter Khmer text here..."></textarea>
+    <p id="errorMsg" class="error-message"></p>
     <button id="analyzeBtn">Analyze Text</button>
-    <p class="note">
-      The system will segment words and assign POS tags using a BiLSTM model.
-    </p>
   </section>
 
-  <!-- RESULT SECTION -->
   <section class="result-section">
     <h2>Output: Word Segmentation & POS Tags</h2>
     <table>
@@ -146,7 +131,7 @@
       </thead>
       <tbody id="resultBody">
         <tr>
-          <td colspan="4">Enter text and click analyze to see results.</td>
+          <td colspan="4">Enter text and click Analyze.</td>
         </tr>
       </tbody>
     </table>
@@ -158,70 +143,8 @@
   © 2026 Advanced Programming for Data Science | Khmer POS Tagging Project
 </footer>
 
-<script>
-  const analyzeBtn = document.getElementById('analyzeBtn');
-  const inputText = document.getElementById('inputText');
-  const resultBody = document.getElementById('resultBody');
-
-  const tagMap = {
-    "AUX": "Auxiliary Verb",
-    "CC": "Conjunction",
-    "CD": "Cardinal Number",
-    "DT": "Determiner Pronoun",
-    "IN": "Preposition",
-    "JJ": "Adjective",
-    "NN": "Noun",
-    "PA": "Particle",
-    "PN": "Proper Noun",
-    "PRO": "Pronoun",
-    "RB": "Adverb",
-    "SYM": "Symbol",
-    "VB": "Verb"
-  };
-
-  analyzeBtn.addEventListener('click', async () => {
-    const text = inputText.value.trim();
-    if (!text) {
-      alert("Please enter text");
-      return;
-    }
-
-    analyzeBtn.innerText = "Analyzing...";
-    analyzeBtn.disabled = true;
-
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/predict', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
-      });
-
-      const data = await response.json();
-      resultBody.innerHTML = '';
-
-      data.tokens.forEach((item, index) => {
-        const shortTag = item.tag.toUpperCase();
-        const fullName = tagMap[shortTag] || shortTag;
-
-        resultBody.innerHTML += `
-          <tr>
-            <td>${index + 1}</td>
-            <td class="khmer-text">${item.word}</td>
-            <td><b style="color:#1f3c88;">${shortTag}</b></td>
-            <td>${fullName}</td>
-          </tr>
-        `;
-      });
-
-    } catch (error) {
-      console.error(error);
-      alert("Could not connect to the backend. Is FastAPI running?");
-    } finally {
-      analyzeBtn.innerText = "Analyze Text";
-      analyzeBtn.disabled = false;
-    }
-  });
-</script>
+<!-- External JS -->
+<script src="app.js"></script>
 
 </body>
 </html>
