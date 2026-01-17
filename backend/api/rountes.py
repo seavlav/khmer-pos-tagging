@@ -49,7 +49,14 @@ async def predict_pos(request: TextRequest, db: Session = Depends(get_db)):
 
     try:
         # 1. Run inference
-        results = predictor.predict(request.text)
+        raw_results = predictor.predict(request.text)
+
+        results = []
+        for r in raw_results:
+            results.append({
+                "word": r["word"],
+                "tag": r["tag"] or "O"
+            })
         
         # 2. Save to Database (PostgreSQL)
         # results is a list of dicts, we store it as a JSON string
