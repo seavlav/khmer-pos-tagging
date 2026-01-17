@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Khmer POS Tagging</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
     body {
       font-family: Arial, Helvetica, sans-serif;
@@ -11,12 +12,14 @@
       margin: 0;
       padding: 0;
     }
+
     header {
       background-color: #1f3c88;
       color: white;
       padding: 20px;
       text-align: center;
     }
+
     main {
       max-width: 900px;
       margin: 30px auto;
@@ -25,19 +28,24 @@
       border-radius: 10px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.08);
     }
+
     h2 {
       margin-top: 0;
       color: #1f3c88;
     }
+
+    /* === INPUT TEXTAREA (MATCH RESULT HEIGHT) === */
     textarea {
       width: 100%;
-      min-height: 140px;
+      min-height: 260px;        /* MATCHES RESULT BOX */
       padding: 12px;
       font-size: 16px;
       border-radius: 6px;
       border: 1px solid #ccc;
       resize: vertical;
+      box-sizing: border-box;
     }
+
     button {
       margin-top: 15px;
       background-color: #1f3c88;
@@ -48,39 +56,63 @@
       border-radius: 6px;
       cursor: pointer;
     }
+
     button:hover {
       background-color: #162d66;
     }
-    .result-section {
-      margin-top: 30px;
+
+    .note {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
     }
+
+    /* === RESULT SECTION === */
+    .result-section {
+      margin-top: 35px;
+      min-height: 260px;       /* SAME AS TEXTAREA */
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 15px;
+      min-height: 200px;       /* PREVENTS SMALL TABLE LOOK */
     }
-    table th, table td {
+
+    table th,
+    table td {
       border: 1px solid #ddd;
       padding: 10px;
       text-align: center;
     }
+
     table th {
       background-color: #f0f3ff;
       color: #1f3c88;
     }
+
+    .khmer-text {
+      font-size: 17px;
+    }
+
     footer {
       text-align: center;
       padding: 15px;
       color: #777;
       font-size: 14px;
     }
-    .note {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #555;
+
+    /* === MOBILE OPTIMIZATION === */
+    @media (max-width: 600px) {
+      textarea,
+      .result-section {
+        min-height: 220px;
+      }
     }
   </style>
 </head>
+
 <body>
 
 <header>
@@ -89,13 +121,18 @@
 </header>
 
 <main>
+
+  <!-- INPUT SECTION -->
   <section>
     <h2>Input Khmer Text</h2>
     <textarea id="inputText" placeholder="Enter Khmer text here..."></textarea>
-    <button id="analyzeBtn">Analyze Text</button> 
-    <p class="note">The system will segment words and assign POS tags using a BiLSTM model.</p>
+    <button id="analyzeBtn">Analyze Text</button>
+    <p class="note">
+      The system will segment words and assign POS tags using a BiLSTM model.
+    </p>
   </section>
 
+  <!-- RESULT SECTION -->
   <section class="result-section">
     <h2>Output: Word Segmentation & POS Tags</h2>
     <table>
@@ -114,6 +151,7 @@
       </tbody>
     </table>
   </section>
+
 </main>
 
 <footer>
@@ -124,58 +162,55 @@
   const analyzeBtn = document.getElementById('analyzeBtn');
   const inputText = document.getElementById('inputText');
   const resultBody = document.getElementById('resultBody');
+
   const tagMap = {
-      "AUX": "Auxiliary Verb",
-      "CC": "Conjunction",
-      "CD": "Cardinal Number",
-      "DT": "Determiner Pronoun",
-      "IN": "Preposition",
-      "JJ": "Adjective",
-      "NN": "Noun",
-      "PA": "Particle",
-      "PN": "Proper Noun",
-      "PRO": "Pronoun",
-      "RB": "Adverb",
-      "SYM": "Symbol",
-      "VB": "Verb"
+    "AUX": "Auxiliary Verb",
+    "CC": "Conjunction",
+    "CD": "Cardinal Number",
+    "DT": "Determiner Pronoun",
+    "IN": "Preposition",
+    "JJ": "Adjective",
+    "NN": "Noun",
+    "PA": "Particle",
+    "PN": "Proper Noun",
+    "PRO": "Pronoun",
+    "RB": "Adverb",
+    "SYM": "Symbol",
+    "VB": "Verb"
   };
 
   analyzeBtn.addEventListener('click', async () => {
     const text = inputText.value.trim();
-    if (!text) return alert("Please enter text");
+    if (!text) {
+      alert("Please enter text");
+      return;
+    }
 
     analyzeBtn.innerText = "Analyzing...";
     analyzeBtn.disabled = true;
 
     try {
-      // Ensure this URL matches your FastAPI server port
       const response = await fetch('http://127.0.0.1:8000/api/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: text })
+        body: JSON.stringify({ text })
       });
 
       const data = await response.json();
-      
-      // Clear and populate table
       resultBody.innerHTML = '';
-      data.tokens.forEach((item, index) => {
-          // Get the tag from the backend (e.g., "NN")
-          const shortTag = item.tag.toUpperCase(); 
-          
-          // Look up the full name (e.g., "Noun"). 
-          // If not found, just show the short tag.
-          const fullName = tagMap[shortTag] || shortTag;
 
-          const row = `
-              <tr>
-                  <td>${index + 1}</td>
-                  <td class="khmer-text">${item.word}</td>
-                  <td><b style="color: #1f3c88;">${shortTag}</b></td>
-                  <td>${fullName}</td>
-              </tr>
-          `;
-          resultBody.innerHTML += row;
+      data.tokens.forEach((item, index) => {
+        const shortTag = item.tag.toUpperCase();
+        const fullName = tagMap[shortTag] || shortTag;
+
+        resultBody.innerHTML += `
+          <tr>
+            <td>${index + 1}</td>
+            <td class="khmer-text">${item.word}</td>
+            <td><b style="color:#1f3c88;">${shortTag}</b></td>
+            <td>${fullName}</td>
+          </tr>
+        `;
       });
 
     } catch (error) {
