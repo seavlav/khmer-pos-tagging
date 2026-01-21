@@ -1,8 +1,2 @@
-# Use Nginx to serve static files
 FROM nginx:alpine
-
-# Copy your index.html to the Nginx html folder
-COPY index.html /usr/share/nginx/html/index.html
-
-# Expose port 80
-EXPOSE 80
+RUN rm /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh
