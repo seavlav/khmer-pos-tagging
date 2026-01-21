@@ -31,13 +31,13 @@ services:
       - ./backend:/usr/src/app
 
   frontend:
-    image: nginx
+    build: .
     container_name: khmer_web_ui
     ports:
       - "80:80"
     volumes:
-      - ./frontend:/usr/share/nginx/html:ro
-      - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./frontend:/usr/share/nginx/html
+      - ./frontent/nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - app
 
