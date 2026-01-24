@@ -101,10 +101,12 @@ Code:
 **Launch the services**
 'docker-compose up --build'
 
+**Test the system at: https://khmer-pos.ams.cards/
 ###  Result: 
 
 Sample of our interface and Prediction after connect to docker
 <img width="1157" height="898" alt="image" src="https://github.com/user-attachments/assets/c82c10b3-50cc-4460-98a3-bfa94b0cbeda" />
+
 
 
 
